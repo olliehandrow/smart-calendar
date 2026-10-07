@@ -258,7 +258,7 @@ const ICONS = {
   overcast:() => SVG(CLOUD(52, -6, .82, '#8da7c6') + CLOUD(0, 24, 1, '#c7def6')),
   fog:     () => SVG(CLOUD(26, 0, 1, '#b7cde6') + `<g stroke="#9db6d4" stroke-width="7" stroke-linecap="round"><line x1="40" y1="104" x2="150" y2="104"/><line x1="58" y1="120" x2="168" y2="120"/></g>`),
   rain:    () => SVG(CLOUD(26, -8, 1, '#8da7c6') + [62, 92, 122].map((x, i) => `<line class="drop" style="animation-delay:${i * .45}s" x1="${x + 6}" y1="98" x2="${x}" y2="114" stroke="#4a90e2" stroke-width="7" stroke-linecap="round"/>`).join('')),
-  snow:    () => SVG(CLOUD(26, -8, 1, '#a9c0dc') + [62, 92, 122].map((x, i) => `<circle class="flake" style="animation-delay:${i * .8}s" cx="${x}" cy="106" r="6" fill="#fff"/>`).join('')),
+  snow:    () => SVG(CLOUD(26, -8, 1, '#a9c0dc') + [62, 92, 122].map((x, i) => `<circle class="flake" style="animation-delay:${i * .8}s" cx="${x}" cy="106" r="6" fill="#cfe3f8" stroke="#6ea3d8" stroke-width="2"/>`).join('')),
   thunder: () => SVG(CLOUD(26, -8, 1, '#7a93b3') + `<polygon points="100,80 80,112 98,112 90,130 122,94 104,94 114,80" fill="#ffd23c"/>`),
 };
 function wxInfo(c) {

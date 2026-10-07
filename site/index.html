@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14232f; --card:#f8fcfd; --frame:#86cbe9; --pill:#cde3ec; --accent:#2f7de1;
+  --head:"Montserrat","Segoe UI",system-ui,sans-serif;
+  --body:"Open Sans","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#1b6fdc;cursor:none}
+
+/* ---------- stage (fixed 1920x1080, scaled to fit any screen) ---------- */
+#stage{
+  position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;
+  font-family:var(--body);color:var(--ink);
+  background:linear-gradient(180deg,#0e5ed2 0%,#2d86ee 48%,#86c1f8 100%);
+}
+/* sky photos: one per slide, crossfade + slow drift (GPU-friendly transform only) */
+.bg{position:absolute;left:-96px;top:-54px;width:2112px;height:1188px;background:center/cover no-repeat;
+  opacity:0;transition:opacity 1.2s ease}
+.bg.on{opacity:1;animation:drift 40s ease-in-out infinite alternate}
+#bg-month{background-image:url(assets/bg-month.jpg)}
+#bg-week{background-image:url(assets/bg-week.jpg)}
+#bg-today{background-image:url(assets/bg-today.jpg)}
+@keyframes drift{from{transform:translate(40px,10px)}to{transform:translate(-40px,-10px)}}
+
+/* ---------- slides ---------- */
+.slide{position:absolute;inset:0;opacity:0;visibility:hidden;transform:translateY(28px) scale(.985);
+  transition:opacity .9s ease,transform .9s ease,visibility 0s .9s}
+.slide.active{opacity:1;visibility:visible;transform:none;transition:opacity .9s ease,transform .9s ease,visibility 0s}
+.title{position:absolute;top:36px;left:0;right:0;text-align:center;font:800 76px/1.1 var(--head);
+  color:#fff;letter-spacing:-1px;text-shadow:0 3px 18px rgba(8,50,120,.25)}
+.pop{opacity:0}
+.slide.active .pop{animation:pop .7s cubic-bezier(.2,.8,.2,1) both;
+  animation-delay:calc(var(--i,0) * var(--step,45ms) + 250ms)}
+@keyframes pop{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:none}}
+.shadow{box-shadow:0 22px 60px rgba(8,60,140,.22)}
+
+/* ---------- month ---------- */
+.m-card{position:absolute;left:80px;top:190px;width:1760px;height:800px;background:var(--frame);
+  border-radius:40px;padding:18px;display:grid;grid-template-rows:64px 1fr;row-gap:8px}
+.m-head,.m-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.m-grid{grid-template-rows:repeat(4,minmax(0,1fr))}
+.dow{background:#fff;border-radius:34px;display:flex;align-items:center;justify-content:center;
+  font:700 26px var(--body);white-space:nowrap}
+.dow small{font-weight:600;opacity:.5;margin-left:10px;font-size:.78em}
+.dow.today{background:var(--accent);color:#fff}
+.dow.today small{opacity:.85}
+.cell{background:var(--card);border-radius:34px;padding:14px 16px 10px;display:flex;flex-direction:column;gap:5px;overflow:hidden}
+.cell .dn{font:700 20px/26px var(--body);color:#3b556b;height:26px;flex:none}
+.cell.today .dn span{background:var(--accent);color:#fff;border-radius:14px;padding:0 11px}
+.cell.past{opacity:.5}
+.pill{background:var(--pill);border-radius:12px;padding:3px 10px;font:600 15px/20px var(--body);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none}
+.pill.more{background:transparent;color:#4a6a82;padding-left:6px}
+
+/* ---------- week ---------- */
+.w-card{position:absolute;left:46px;top:170px;width:1828px;height:840px;background:var(--frame);
+  border-radius:40px;padding:20px 22px;display:grid;grid-template-columns:86px 1fr;
+  grid-template-rows:56px auto 1fr;column-gap:8px;row-gap:8px}
+.w-head,.w-allday,.w-body{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));column-gap:6px}
+.w-head{grid-column:2;grid-row:1}
+.w-allday{grid-column:2;grid-row:2;row-gap:6px}
+.w-allday:empty{display:none}
+.ad{background:#fff;border-radius:20px;padding:4px 14px;text-align:center;font:600 17px/22px var(--body);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.w-hours{grid-column:1;grid-row:3;background:#fff;border-radius:42px;position:relative}
+.hr{position:absolute;left:0;right:0;text-align:center;transform:translateY(-50%);font:600 17px/1 var(--body);color:#2c4357}
+.w-body{grid-column:2;grid-row:3}
+.w-col{background:var(--card);border-radius:36px;position:relative;overflow:hidden}
+.w-col.today{background:#fff;box-shadow:inset 0 0 0 3px rgba(47,125,225,.4)}
+.hl{position:absolute;left:16px;right:16px;height:1px;background:rgba(40,90,140,.09)}
+.ev{position:absolute;background:var(--pill);border-radius:26px;padding:8px 10px;display:flex;flex-direction:column;
+  justify-content:safe center;align-items:center;text-align:center;overflow:hidden;
+  font:400 17px/1.22 var(--body);color:var(--ink);box-shadow:0 0 0 2px rgba(255,255,255,.75)}
+.ev i{font-style:italic;font-size:15px;margin-top:2px}
+.ev.narrow{padding:6px 4px;border-radius:20px;font-size:14.5px;line-height:1.18;hyphens:auto}
+.ev.narrow i{font-size:13px}
+.ev{z-index:2}
+.nowline{position:absolute;left:8px;right:8px;height:3px;border-radius:2px;background:#ff6a3d;z-index:1;
+  box-shadow:0 0 0 2px rgba(255,255,255,.7)}
+.nowline::before{content:"";position:absolute;left:-4px;top:-5px;width:12px;height:12px;border-radius:50%;background:#ff6a3d}
+
+/* ---------- today ---------- */
+.t-flyer{position:absolute;left:117px;top:190px;width:616px;height:823px;background:#fff;border-radius:30px;padding:16px}
+.t-flyer img{width:100%;height:100%;object-fit:contain;border-radius:18px;display:block}
+.t-tl{position:absolute;left:778px;top:190px;width:402px;height:823px;display:grid;
+  grid-template-columns:92px 1fr;grid-template-rows:auto 1fr;column-gap:12px;row-gap:10px}
+.no-flyer .t-flyer{display:none}
+.no-flyer .t-tl{left:117px;width:1010px}
+.t-allday{grid-column:2;grid-row:1;display:flex;flex-direction:column;gap:6px}
+.t-allday:empty{display:none}
+.t-hours{grid-column:1;grid-row:2;background:rgba(255,255,255,.93);border-radius:44px;position:relative}
+.t-body{grid-column:2;grid-row:2;background:rgba(255,255,255,.9);border-radius:38px;position:relative;overflow:hidden}
+.t-body .ev{font-size:19px}
+.t-body .ev i{font-size:16px}
+.t-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;
+  padding:0 40px;font:500 22px/1.4 var(--head);color:#7c97ad}
+.t-side{position:absolute;left:1224px;top:190px;width:599px;height:823px;display:flex;flex-direction:column;gap:9px}
+.card{background:rgba(255,255,255,.93);border-radius:32px}
+.wx{height:228px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 52px 0 62px}
+.wx-l{display:flex;flex-direction:column;align-items:flex-start}
+.wx-l svg{width:168px;height:109px;animation:float 6s ease-in-out infinite}
+.wx-l span{font:400 44px/1 var(--head);margin-top:2px}
+.wx-t{font:800 56px/1 var(--head);letter-spacing:-1px}
+.wx-na{font:500 28px var(--head);color:#7c97ad}
+.fact{height:227px;flex:none;padding:26px 18px 0;text-align:center}
+.fact h3,.quote h3{font:400 31px/1.2 var(--head);margin-bottom:18px}
+.fact p{background:#fff;border-radius:30px;padding:26px 24px;font:700 32px/1.25 var(--body)}
+.quote{flex:1;padding:42px 26px 0;text-align:center}
+.quote p{font:italic 700 36px/1.28 var(--body);padding:0 6px}
+.quote em{display:block;font:700 30px var(--body);font-style:normal;text-align:right;margin-top:6px;padding-right:12px}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.rays{transform-origin:100px 65px;animation:spin 50s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.drop{animation:drop 1.6s ease-in infinite}
+@keyframes drop{0%{transform:translateY(-8px);opacity:0}30%{opacity:1}100%{transform:translateY(14px);opacity:0}}
+.flake{animation:drop 3s ease-in infinite}
+
+/* ---------- chrome ---------- */
+.dots{position:absolute;left:0;right:0;bottom:22px;display:flex;justify-content:center;gap:10px}
+.dots i{width:10px;height:10px;border-radius:5px;background:rgba(255,255,255,.45);transition:width .5s,background .5s}
+.dots i.on{width:34px;background:#fff}
+.stale{position:absolute;right:26px;bottom:18px;font:600 15px var(--body);color:rgba(255,255,255,.8)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="bg" id="bg-month"></div><div class="bg" id="bg-week"></div><div class="bg" id="bg-today"></div>
+  <section class="slide" id="s-month"></section>
+  <section class="slide" id="s-week"></section>
+  <section class="slide" id="s-today"></section>
+  <div class="dots"><i></i><i></i><i></i></div>
+  <div class="stale" id="stale"></div>
+</div>
+
+<script>
+/* ============ config ============ */
+const SLIDES = [
+  { id: 's-month', name: 'month', seconds: 15 },
+  { id: 's-week',  name: 'week',  seconds: 18 },
+  { id: 's-today', name: 'today', seconds: 22 },
+];
+const REFRESH_MS = 30 * 60 * 1000;   // re-fetch data.json every 30 minutes
+const HS = 7, HE = 21, PAD = 26;     // week/today timeline: 7am-9pm, px padding top/bottom
+
+/* ============ state ============ */
+let TZ = 'America/Denver', EV = [], WX = {}, FACTS = [], QUOTES = [], RAW = '';
+const params = new URLSearchParams(location.search);
+
+/* ============ helpers ============ */
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const pad = n => String(n).padStart(2, '0');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const keyToUTC = k => { const [y, m, d] = k.split('-').map(Number); return Date.UTC(y, m - 1, d); };
+const utcToKey = t => { const d = new Date(t); return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`; };
+const addDays = (k, n) => utcToKey(keyToUTC(k) + n * 864e5);
+const dow = k => new Date(keyToUTC(k)).getUTCDay();
+const dayNum = k => +k.slice(8, 10);
+const monthIdx = k => +k.slice(5, 7) - 1;
+const mins = s => +s.slice(11, 13) * 60 + +s.slice(14, 16);
+const fmtT = m => { const h = Math.floor(m / 60) % 24, mm = m % 60; return `${h % 12 || 12}:${pad(mm)} ${h >= 12 ? 'PM' : 'AM'}`; };
+const shortT = m => { const h = Math.floor(m / 60) % 24, mm = m % 60; return `${h % 12 || 12}${mm ? ':' + pad(mm) : ''}${h >= 12 ? 'p' : 'a'}`; };
+const hourLabel = h => `${h % 12 || 12}${h >= 12 ? 'pm' : 'am'}`;
+
+/* "now" in the display timezone, independent of the Pi's own timezone setting.
+   Test with ?now=2026-10-10T12:00 */
+function now() {
+  const o = params.get('now');
+  if (o) return { key: o.slice(0, 10), min: o.length >= 16 ? mins(o) : 720 };
+  try {
+    const p = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+      timeZone: TZ, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+    }).formatToParts(new Date()).map(x => [x.type, x.value]));
+    return { key: `${p.year}-${p.month}-${p.day}`, min: +p.hour * 60 + +p.minute };
+  } catch (e) {
+    const d = new Date();
+    return { key: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, min: d.getHours() * 60 + d.getMinutes() };
+  }
+}
+
+/* ============ events ============ */
+// data.json events are wall-clock times in the display timezone:
+//   timed:   { title, start:"2026-10-07T09:00", end:"2026-10-07T09:45" }
+//   all-day: { title, all_day:true, start:"2026-10-04", end:"2026-10-10" }   (end inclusive)
+const prep = list => list.map(e => {
+  const sk = e.start.slice(0, 10), ek = (e.end || e.start).slice(0, 10);
+  return e.all_day ? { ...e, sk, ek } : { ...e, sk, ek, sm: mins(e.start), em: mins(e.end || e.start) };
+});
+
+function dayItems(d) {
+  const allday = [], timed = [];
+  for (const e of EV) {
+    if (d < e.sk || d > e.ek) continue;
+    if (e.all_day) { allday.push(e); continue; }
+    const s = d === e.sk ? e.sm : 0;
+    let en = d === e.ek ? e.em : 1440;
+    if (en <= s) en = Math.min(s + 30, 1440);
+    timed.push({ ...e, s, en });
+  }
+  timed.sort((a, b) => a.s - b.s || a.en - b.en);
+  return { allday, timed };
+}
+
+// side-by-side lanes for overlapping events.
+// Short events are drawn at least MIN_VIS minutes tall so their text fits; lanes use that drawn size.
+const MIN_VIS = 110;
+function lanes(items) {
+  items.forEach(it => { it.ve = Math.max(it.en, it.s + MIN_VIS); });
+  items = items.map(it => ({ ...it, en0: it.en, en: it.ve }));
+  let cluster = [], cEnd = -1;
+  const flush = () => {
+    const cols = [];
+    cluster.forEach(it => {
+      let c = cols.findIndex(end => end <= it.s);
+      if (c < 0) { c = cols.length; cols.push(0); }
+      cols[c] = it.en; it.col = c;
+    });
+    cluster.forEach(it => it.cols = cols.length);
+    cluster = [];
+  };
+  items.forEach(it => {
+    if (cluster.length && it.s >= cEnd) { flush(); cEnd = -1; }
+    cluster.push(it); cEnd = Math.max(cEnd, it.en);
+  });
+  if (cluster.length) flush();
+  return items;
+}
+
+const yFrac = m => Math.max(0, Math.min(1, (m / 60 - HS) / (HE - HS)));
+const topCss = f => `calc(${PAD}px + (100% - ${2 * PAD}px) * ${f})`;
+function evHtml(it, i) {
+  const w = 100 / it.cols, l = it.col * w, f1 = yFrac(it.s), f2 = yFrac(it.en);
+  return `<div class="ev pop ${it.cols > 1 ? 'narrow' : ''}" style="--i:${i};top:${topCss(f1)};height:calc((100% - ${2 * PAD}px) * ${(f2 - f1).toFixed(4)});left:calc(${l}% + ${it.cols > 1 ? 5 : 8}px);width:calc(${w}% - ${it.cols > 1 ? 8 : 12}px)">
+    <span>${esc(it.title)}</span><i>${it.cols > 1 ? `${shortT(it.s)} - ${shortT(it.en0)}` : `${fmtT(it.s)} - ${fmtT(it.en0)}`}</i></div>`;
+}
+const hoursHtml = cls => { let h = ''; for (let x = HS; x <= HE; x++) h += `<div class="hr" style="top:${topCss((x - HS) / (HE - HS))}">${hourLabel(x)}</div>`; return h; };
+const linesHtml = () => { let h = ''; for (let x = HS; x <= HE; x++) h += `<div class="hl" style="top:${topCss((x - HS) / (HE - HS))}"></div>`; return h; };
+
+/* ============ weather ============ */
+const CLOUD = (x, y, s, f) => `<g transform="translate(${x} ${y}) scale(${s})" fill="${f}"><circle cx="38" cy="62" r="28"/><circle cx="76" cy="42" r="36"/><circle cx="112" cy="62" r="28"/><rect x="38" y="52" width="74" height="38"/></g>`;
+const SVG = inner => `<svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+const SUN = (cx, cy, r, rays) => `${rays ? `<g class="rays" stroke="#ffc93c" stroke-width="7" stroke-linecap="round">${[0,45,90,135,180,225,270,315].map(a => `<line x1="${cx}" y1="${cy - r - 14}" x2="${cx}" y2="${cy - r - 28}" transform="rotate(${a} ${cx} ${cy})"/>`).join('')}</g>` : ''}<circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffc93c"/>`;
+const ICONS = {
+  clear:   () => SVG(SUN(100, 65, 30, true)),
+  partly:  () => SVG(`<g>${SUN(68, 46, 24, false)}</g>${CLOUD(34, 28, .95, '#c7def6')}`),
+  overcast:() => SVG(CLOUD(52, -6, .82, '#8da7c6') + CLOUD(0, 24, 1, '#c7def6')),
+  fog:     () => SVG(CLOUD(26, 0, 1, '#b7cde6') + `<g stroke="#9db6d4" stroke-width="7" stroke-linecap="round"><line x1="40" y1="104" x2="150" y2="104"/><line x1="58" y1="120" x2="168" y2="120"/></g>`),
+  rain:    () => SVG(CLOUD(26, -8, 1, '#8da7c6') + [62, 92, 122].map((x, i) => `<line class="drop" style="animation-delay:${i * .45}s" x1="${x + 6}" y1="98" x2="${x}" y2="114" stroke="#4a90e2" stroke-width="7" stroke-linecap="round"/>`).join('')),
+  snow:    () => SVG(CLOUD(26, -8, 1, '#a9c0dc') + [62, 92, 122].map((x, i) => `<circle class="flake" style="animation-delay:${i * .8}s" cx="${x}" cy="106" r="6" fill="#fff"/>`).join('')),
+  thunder: () => SVG(CLOUD(26, -8, 1, '#7a93b3') + `<polygon points="100,80 80,112 98,112 90,130 122,94 104,94 114,80" fill="#ffd23c"/>`),
+};
+function wxInfo(c) {
+  if (c === 0) return ['Clear', 'clear'];
+  if (c === 1) return ['Mostly clear', 'clear'];
+  if (c === 2) return ['Partly cloudy', 'partly'];
+  if (c === 3) return ['Overcast', 'overcast'];
+  if (c === 45 || c === 48) return ['Foggy', 'fog'];
+  if (c >= 51 && c <= 57) return ['Drizzle', 'rain'];
+  if (c >= 61 && c <= 65) return ['Rain', 'rain'];
+  if (c === 66 || c === 67) return ['Freezing rain', 'rain'];
+  if (c >= 71 && c <= 77) return ['Snow', 'snow'];
+  if (c >= 80 && c <= 82) return ['Showers', 'rain'];
+  if (c === 85 || c === 86) return ['Snow showers', 'snow'];
+  if (c >= 95) return ['Thunderstorms', 'thunder'];
+  return ['Cloudy', 'overcast'];
+}
+
+/* ============ slide renderers ============ */
+function renderMonth(n) {
+  const ws = addDays(n.key, -dow(n.key));
+  let head = '', cells = '';
+  DAYS.forEach((d, i) => head += `<div class="dow pop" style="--i:${i}">${d}</div>`);
+  for (let i = 0; i < 28; i++) {
+    const d = addDays(ws, i), { allday, timed } = dayItems(d);
+    const all = [...allday.map(e => e.title), ...timed.map(e => `${shortT(e.s)} ${e.title}`)];
+    const shown = all.length > 3 ? all.slice(0, 2) : all;
+    const label = dayNum(d) === 1 ? `${MON[monthIdx(d)]} 1` : dayNum(d);
+    cells += `<div class="cell pop ${d === n.key ? 'today' : ''} ${d < n.key ? 'past' : ''}" style="--i:${i}">
+      <div class="dn"><span>${label}</span></div>
+      ${shown.map(t => `<div class="pill">${esc(t)}</div>`).join('')}
+      ${all.length > 3 ? `<div class="pill more">+${all.length - 2} more</div>` : ''}</div>`;
+  }
+  return `<div class="title">${MONTHS[monthIdx(n.key)]}</div>
+    <div class="m-card shadow"><div class="m-head" style="--step:30ms">${head}</div><div class="m-grid" style="--step:22ms">${cells}</div></div>`;
+}
+
+function renderWeek(n) {
+  const ws = addDays(n.key, -dow(n.key)), days = [...Array(7)].map((_, i) => addDays(ws, i));
+  const head = days.map((d, i) => `<div class="dow pop ${d === n.key ? 'today' : ''}" style="--i:${i}">${DAYS[i]}<small>${dayNum(d)}</small></div>`).join('');
+
+  const rows = [];
+  EV.filter(e => e.all_day && e.ek >= days[0] && e.sk <= days[6])
+    .sort((a, b) => a.sk.localeCompare(b.sk) || b.ek.localeCompare(a.ek))
+    .forEach(e => {
+      const a = Math.max(0, Math.round((keyToUTC(e.sk) - keyToUTC(ws)) / 864e5));
+      const b = Math.min(6, Math.round((keyToUTC(e.ek) - keyToUTC(ws)) / 864e5));
+      let row = 0; while (rows.some(x => x.row === row && !(b < x.a || a > x.b))) row++;
+      rows.push({ e, a, b, row });
+    });
+  const allday = rows.map(x => `<div class="ad pop" style="grid-column:${x.a + 1}/${x.b + 2};grid-row:${x.row + 1};--i:${x.row + 2}">${esc(x.e.title)}</div>`).join('');
+
+  let k = 0;
+  const cols = days.map(d => {
+    const evs = lanes(dayItems(d).timed).map(it => evHtml(it, 4 + k++)).join('');
+    const inRange = d === n.key && n.min >= HS * 60 && n.min <= HE * 60;
+    return `<div class="w-col ${d === n.key ? 'today' : ''}">${linesHtml()}${evs}${d === n.key ? `<div class="nowline" style="top:${topCss(yFrac(n.min))};${inRange ? '' : 'display:none'}"></div>` : ''}</div>`;
+  }).join('');
+
+  return `<div class="title">This week</div>
+    <div class="w-card shadow">
+      <div class="w-head" style="--step:35ms">${head}</div>
+      <div class="w-allday">${allday}</div>
+      <div class="w-hours">${hoursHtml()}</div>
+      <div class="w-body">${cols}</div>
+    </div>`;
+}
+
+function renderToday(n) {
+  const d = n.key, { allday, timed } = dayItems(d);
+  const evs = lanes(timed).map((it, i) => evHtml(it, 3 + i)).join('');
+  const chips = allday.map((e, i) => `<div class="ad pop" style="--i:${i + 2}">${esc(e.title)}</div>`).join('');
+  const inRange = n.min >= HS * 60 && n.min <= HE * 60;
+  const di = Math.floor(keyToUTC(d) / 864e5);
+  const fact = FACTS.length ? FACTS[di % FACTS.length] : '';
+  const q = QUOTES.length ? QUOTES[di % QUOTES.length] : null;
+  const w = WX[d], [label, kind] = w ? wxInfo(w.code) : ['', ''];
+  const ym = d.slice(0, 7);
+  document.getElementById('stage').classList.remove('no-flyer');
+  return `<div class="title">${DAYS[dow(d)]} ${MON[monthIdx(d)]} ${dayNum(d)}</div>
+    <div class="t-flyer card pop shadow" style="--i:0"><img alt="" src="assets/flyer-${ym}.png" onerror="flyerFallback(this)"></div>
+    <div class="t-tl">
+      <div class="t-allday">${chips}</div>
+      <div class="t-hours pop" style="--i:1">${hoursHtml()}</div>
+      <div class="t-body pop" style="--i:2">${linesHtml()}${evs}
+        ${timed.length || allday.length ? '' : '<div class="t-empty">Nothing on the calendar today</div>'}
+        <div class="nowline" style="top:${topCss(yFrac(n.min))};${inRange ? '' : 'display:none'}"></div></div>
+    </div>
+    <div class="t-side">
+      <div class="card wx pop shadow" style="--i:1">${w
+        ? `<div class="wx-l">${ICONS[kind]()}<span>${label}</span></div><div class="wx-t">${w.low}°/${w.high}°</div>`
+        : `<div class="wx-na">Weather unavailable</div>`}</div>
+      <div class="card fact pop shadow" style="--i:2"><h3>Fun Fact of the day:</h3><p>${esc(fact)}</p></div>
+      <div class="card quote pop shadow" style="--i:3"><h3>Quote of the day:</h3>${q ? `<p>“${esc(q.text)}”</p>${q.author ? `<em>- ${esc(q.author)}</em>` : ''}` : ''}</div>
+    </div>`;
+}
+function flyerFallback(img) {
+  if (!img.dataset.t) { img.dataset.t = 1; img.src = 'assets/flyer.png'; }
+  else document.getElementById('stage').classList.add('no-flyer');
+}
+
+const RENDER = { 's-month': renderMonth, 's-week': renderWeek, 's-today': renderToday };
+
+/* ============ rotation ============ */
+let cur = -1, timer = null, shownKey = '';
+function show(i) {
+  const n = now(); shownKey = n.key;
+  const s = SLIDES[i], el = document.getElementById(s.id);
+  el.innerHTML = RENDER[s.id](n);
+  requestAnimationFrame(() => {
+    SLIDES.forEach((x, j) => {
+      document.getElementById(x.id).classList.toggle('active', j === i);
+      document.getElementById('bg-' + x.name).classList.toggle('on', j === i);
+    });
+    document.querySelectorAll('.dots i').forEach((d, j) => d.classList.toggle('on', j === i));
+  });
+  cur = i;
+  clearTimeout(timer);
+  if (!params.get('slide')) timer = setTimeout(() => show((i + 1) % SLIDES.length), s.seconds * 1000);
+}
+
+// keep the "now" line moving and roll the date over at midnight
+setInterval(() => {
+  const n = now();
+  if (n.key !== shownKey && cur >= 0) { show(cur); return; }
+  document.querySelectorAll('.nowline').forEach(l => {
+    const ok = n.min >= HS * 60 && n.min <= HE * 60;
+    l.style.display = ok ? '' : 'none';
+    if (ok) l.style.top = topCss(yFrac(n.min));
+  });
+}, 30000);
+
+/* ============ data ============ */
+async function load() {
+  try {
+    const r = await fetch('data.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status);
+    const text = await r.text();
+    if (text === RAW) return true;
+    const j = JSON.parse(text); RAW = text;
+    TZ = j.timezone || TZ; EV = prep(j.events || []); WX = j.weather || {};
+    FACTS = j.facts || []; QUOTES = j.quotes || [];
+    const st = document.getElementById('stale'), age = Date.now() - Date.parse(j.generated_at || '');
+    st.textContent = age > 36 * 36e5 ? 'Data last updated ' + new Date(j.generated_at).toLocaleString() : '';
+    return true;
+  } catch (e) { console.warn('data.json load failed', e); return false; }
+}
+
+/* ============ boot ============ */
+function fit() {
+  const s = Math.min(innerWidth / 1920, innerHeight / 1080), st = document.getElementById('stage');
+  st.style.transform = `translate(${(innerWidth - 1920 * s) / 2}px, ${(innerHeight - 1080 * s) / 2}px) scale(${s})`;
+}
+addEventListener('resize', fit); fit();
+
+(async function boot() {
+  while (!(await load())) await new Promise(r => setTimeout(r, 30000));
+  const pin = params.get('slide');
+  const i = pin ? Math.max(0, SLIDES.findIndex(s => s.name === pin)) : 0;
+  show(i);
+  setInterval(load, REFRESH_MS);
+})();
+</script>
+</body>
+</html>

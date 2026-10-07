@@ -1,0 +1,52 @@
+name: Update calendar
+
+on:
+  schedule:
+    # GitHub cron is UTC. These are 5am, 11am and 5pm Mountain Daylight Time
+    # (4am/10am/4pm once clocks fall back in November). Runs can start 5-20 min late.
+    - cron: "0 11 * * *"
+    - cron: "0 17 * * *"
+    - cron: "0 23 * * *"
+  push:
+    branches: [main]
+  workflow_dispatch: {}        # "Run workflow" button for an on-demand refresh
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build data.json
+        env:
+          PCO_APP_ID: ${{ secrets.PCO_APP_ID }}
+          PCO_SECRET: ${{ secrets.PCO_SECRET }}
+          TIMEZONE: ${{ vars.TIMEZONE || 'America/Denver' }}
+          LATITUDE: ${{ vars.LATITUDE }}
+          LONGITUDE: ${{ vars.LONGITUDE }}
+          PCO_ONLY_PUBLIC: ${{ vars.PCO_ONLY_PUBLIC }}
+          PCO_APPROVED_ONLY: ${{ vars.PCO_APPROVED_ONLY }}
+        run: python scripts/build_data.py
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4

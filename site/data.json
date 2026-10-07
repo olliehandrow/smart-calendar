@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-10-07T06:00:00Z",
+  "timezone": "America/Denver",
+  "events": [
+    { "title": "Intersession Camps", "all_day": true, "start": "2026-10-04", "end": "2026-10-10" },
+    { "title": "Soccer Stars at Desert Bloomers", "start": "2026-10-07T09:00", "end": "2026-10-07T09:45" },
+    { "title": "Space Spectacular: Galaxy in a Jar", "start": "2026-10-10T11:30", "end": "2026-10-10T14:30" },
+    { "title": "Fab Lab- Cosmic Architecture", "start": "2026-10-10T13:00", "end": "2026-10-10T14:00" },
+    { "title": "Cloud Investigator", "start": "2026-10-06T10:00", "end": "2026-10-06T10:45" },
+    { "title": "Halloween Windsocks", "start": "2026-10-06T13:00", "end": "2026-10-06T14:00" },
+    { "title": "Wild Thing Shadows", "start": "2026-10-13T10:30", "end": "2026-10-13T11:15" },
+    { "title": "Monster Face Mix-Up", "start": "2026-10-15T09:30", "end": "2026-10-15T10:15" },
+    { "title": "Dancing Snake", "start": "2026-10-17T11:00", "end": "2026-10-17T12:00" },
+    { "title": "Water Cycle", "start": "2026-10-21T14:00", "end": "2026-10-21T15:00" },
+    { "title": "Spooky Circuits", "start": "2026-10-24T13:00", "end": "2026-10-24T14:30" },
+    { "title": "Member Morning", "start": "2026-10-24T08:00", "end": "2026-10-24T09:00" },
+    { "title": "Trunk or Treat", "start": "2026-10-30T17:00", "end": "2026-10-30T19:00" }
+  ],
+  "weather": {
+    "2026-10-06": { "code": 3, "low": 75, "high": 85 },
+    "2026-10-07": { "code": 2, "low": 72, "high": 88 },
+    "2026-10-08": { "code": 0, "low": 70, "high": 90 },
+    "2026-10-09": { "code": 61, "low": 66, "high": 79 },
+    "2026-10-10": { "code": 1, "low": 68, "high": 84 }
+  },
+  "facts": [
+    "Octopuses have three hearts!",
+    "Honey never spoils. Archaeologists have found 3,000-year-old honey that's still edible.",
+    "A cloud can weigh more than a million pounds.",
+    "Bananas are berries, but strawberries aren't.",
+    "Saturn would float if you could find a bathtub big enough.",
+    "Sharks existed before trees.",
+    "A day on Venus is longer than its year."
+  ],
+  "quotes": [
+    { "text": "The road to success begins with knowing what you need to know and why.", "author": "Savania China" },
+    { "text": "Play is the highest form of research.", "author": "Albert Einstein" },
+    { "text": "The important thing is not to stop questioning.", "author": "Albert Einstein" },
+    { "text": "Somewhere, something incredible is waiting to be known.", "author": "Carl Sagan" },
+    { "text": "Tell me and I forget. Teach me and I remember. Involve me and I learn.", "author": "" }
+  ]
+}

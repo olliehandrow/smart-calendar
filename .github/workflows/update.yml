@@ -8,7 +8,7 @@ on:
     - cron: "0 17 * * *"
     - cron: "0 23 * * *"
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch: {}        # "Run workflow" button for an on-demand refresh
 
 permissions:

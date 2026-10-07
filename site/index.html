@@ -63,8 +63,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1b6fdc;cursor:none}
 
 /* ---------- week ---------- */
 .w-card{position:absolute;left:46px;top:170px;width:1828px;height:840px;background:var(--frame);
-  border-radius:40px;padding:20px 22px;display:grid;grid-template-columns:86px 1fr;
-  grid-template-rows:56px auto 1fr;column-gap:8px;row-gap:8px}
+  border-radius:40px;padding:20px 22px;display:grid;grid-template-columns:86px minmax(0,1fr);
+  grid-template-rows:56px auto 1fr;column-gap:8px;row-gap:8px;overflow:hidden}
 .w-head,.w-allday,.w-body{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));column-gap:6px}
 .w-head{grid-column:2;grid-row:1}
 .w-allday{grid-column:2;grid-row:2;row-gap:6px}
@@ -92,7 +92,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1b6fdc;cursor:none}
 .t-flyer{position:absolute;left:117px;top:190px;width:616px;height:823px;background:#fff;border-radius:30px;padding:16px}
 .t-flyer img{width:100%;height:100%;object-fit:contain;border-radius:18px;display:block}
 .t-tl{position:absolute;left:778px;top:190px;width:402px;height:823px;display:grid;
-  grid-template-columns:92px 1fr;grid-template-rows:auto 1fr;column-gap:12px;row-gap:10px}
+  grid-template-columns:92px minmax(0,1fr);grid-template-rows:auto 1fr;column-gap:12px;row-gap:10px;overflow:hidden}
 .no-flyer .t-flyer{display:none}
 .no-flyer .t-tl{left:117px;width:1010px}
 .t-allday{grid-column:2;grid-row:1;display:flex;flex-direction:column;gap:6px}
@@ -111,10 +111,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1b6fdc;cursor:none}
 .wx-l span{font:400 44px/1 var(--head);margin-top:2px}
 .wx-t{font:800 56px/1 var(--head);letter-spacing:-1px}
 .wx-na{font:500 28px var(--head);color:#7c97ad}
-.fact{height:227px;flex:none;padding:26px 18px 0;text-align:center}
-.fact h3,.quote h3{font:400 31px/1.2 var(--head);margin-bottom:18px}
-.fact p{background:#fff;border-radius:30px;padding:26px 24px;font:700 32px/1.25 var(--body)}
-.quote{flex:1;padding:42px 26px 0;text-align:center}
+.fact{height:227px;flex:none;padding:26px 18px 18px;text-align:center;display:flex;flex-direction:column;overflow:hidden}
+.fact h3,.quote h3{font:400 31px/1.2 var(--head);margin-bottom:18px;flex:none}
+.fact p{flex:1;min-height:0;overflow:hidden;background:#fff;border-radius:30px;padding:16px 24px;
+  font:700 32px/1.25 var(--body);display:flex;align-items:center;justify-content:center}
+.quote{flex:1;padding:42px 26px 20px;text-align:center;display:flex;flex-direction:column;overflow:hidden}
+.quote-body{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
 .quote p{font:italic 700 36px/1.28 var(--body);padding:0 6px}
 .quote em{display:block;font:700 30px var(--body);font-style:normal;text-align:right;margin-top:6px;padding-right:12px}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
@@ -350,7 +352,7 @@ function renderToday(n) {
         ? `<div class="wx-l">${ICONS[kind]()}<span>${label}</span></div><div class="wx-t">${w.low}°/${w.high}°</div>`
         : `<div class="wx-na">Weather unavailable</div>`}</div>
       <div class="card fact pop shadow" style="--i:2"><h3>Fun Fact of the day:</h3><p>${esc(fact)}</p></div>
-      <div class="card quote pop shadow" style="--i:3"><h3>Quote of the day:</h3>${q ? `<p>“${esc(q.text)}”</p>${q.author ? `<em>- ${esc(q.author)}</em>` : ''}` : ''}</div>
+      <div class="card quote pop shadow" style="--i:3"><h3>Quote of the day:</h3>${q ? `<div class="quote-body"><p>“${esc(q.text)}”</p>${q.author ? `<em>- ${esc(q.author)}</em>` : ''}</div>` : ''}</div>
     </div>`;
 }
 function flyerFallback(img) {
@@ -360,12 +362,44 @@ function flyerFallback(img) {
 
 const RENDER = { 's-month': renderMonth, 's-week': renderWeek, 's-today': renderToday };
 
+/* ============ shrink-to-fit text ============
+   Boxes stay a fixed size; when content (event/fact/quote text, often from
+   an API and unpredictable in length) is too big, the font shrinks instead
+   of the box growing or overflowing into neighbors. */
+function fitOne(el, min = 12, step = 1) {
+  if (!el) return;
+  let size = parseFloat(getComputedStyle(el).fontSize);
+  let guard = 60;
+  while (guard-- > 0 && size > min && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1)) {
+    size -= step;
+    el.style.fontSize = size + 'px';
+  }
+}
+function fitGroup(container, targets, min = 12, step = 1) {
+  if (!container || !targets.length) return;
+  const sizes = targets.map(el => parseFloat(getComputedStyle(el).fontSize));
+  let guard = 60;
+  while (guard-- > 0 && container.scrollHeight > container.clientHeight + 1) {
+    let shrunk = false;
+    targets.forEach((el, i) => {
+      if (sizes[i] > min) { sizes[i] -= step; el.style.fontSize = sizes[i] + 'px'; shrunk = true; }
+    });
+    if (!shrunk) break;
+  }
+}
+function fitText(root) {
+  root.querySelectorAll('.ad, .pill, .fact p').forEach(el => fitOne(el));
+  const qb = root.querySelector('.quote-body');
+  if (qb) fitGroup(qb, [...qb.querySelectorAll('p, em')]);
+}
+
 /* ============ rotation ============ */
 let cur = -1, timer = null, shownKey = '';
 function show(i) {
   const n = now(); shownKey = n.key;
   const s = SLIDES[i], el = document.getElementById(s.id);
   el.innerHTML = RENDER[s.id](n);
+  fitText(el);
   requestAnimationFrame(() => {
     SLIDES.forEach((x, j) => {
       document.getElementById(x.id).classList.toggle('active', j === i);

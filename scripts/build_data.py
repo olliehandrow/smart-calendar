@@ -7,6 +7,8 @@ Builds site/data.json for the smart calendar display.
   - Facts:   uselessfacts.jsph.pl (free, no API key)
   - Quotes:  zenquotes.io (free, no API key)
              Both fall back to content/facts.txt / content/quotes.txt if the API call fails.
+             Fetched once per local day: later builds that day reuse the facts/quotes
+             from the currently deployed data.json (PAGES_URL) so they don't change.
 
 Standard library only, so the GitHub Action needs no pip install.
 
@@ -16,6 +18,7 @@ Environment variables (set as GitHub Secrets / Variables):
   LATITUDE, LONGITUDE      for the weather card           (optional; weather is skipped if unset)
   PCO_ONLY_PUBLIC          "true" to show only events visible in Church Center (default false)
   PCO_APPROVED_ONLY        "true" to hide pending/rejected events (default true)
+  PAGES_URL                deployed site URL, set by the workflow (optional)
 """
 import base64, json, os, sys, urllib.parse, urllib.request
 from datetime import datetime, timedelta, timezone
@@ -161,6 +164,21 @@ def fetch_quotes(n=10):
     return read_quotes()
 
 
+def previous_content(today):
+    """Facts/quotes from the deployed data.json if it was built earlier today, else None."""
+    base = os.environ.get("PAGES_URL", "").strip()
+    if not base:
+        return None
+    try:
+        prev = get_json(base.rstrip("/") + "/data.json")
+    except Exception as ex:
+        print("previous data.json fetch failed:", ex)
+        return None
+    if prev.get("content_date") == today.isoformat() and prev.get("facts") and prev.get("quotes"):
+        return prev["facts"], prev["quotes"]
+    return None
+
+
 # ---------------------------------------------------------------- main
 def main():
     today = datetime.now(TZ).date()
@@ -169,13 +187,15 @@ def main():
     end = start + timedelta(days=36)                                 # 4-week month view + margin
 
     events = fetch_events(start, end)
+    facts, quotes = previous_content(today) or (fetch_facts(), fetch_quotes())
     data = {
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "timezone": TZ_NAME,
         "events": events,
         "weather": fetch_weather(),
-        "facts": fetch_facts(),
-        "quotes": fetch_quotes(),
+        "content_date": today.isoformat(),
+        "facts": facts,
+        "quotes": quotes,
     }
     OUT.write_text(json.dumps(data, indent=1, ensure_ascii=False), encoding="utf-8")
     print(f"wrote {OUT} with {len(events)} events, {len(data['weather'])} weather days")

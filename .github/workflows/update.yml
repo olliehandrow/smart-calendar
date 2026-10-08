@@ -33,6 +33,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - id: pages
+        uses: actions/configure-pages@v5
+
       - name: Build data.json
         env:
           PCO_APP_ID: ${{ secrets.PCO_APP_ID }}
@@ -42,9 +45,9 @@ jobs:
           LONGITUDE: ${{ vars.LONGITUDE }}
           PCO_ONLY_PUBLIC: ${{ vars.PCO_ONLY_PUBLIC }}
           PCO_APPROVED_ONLY: ${{ vars.PCO_APPROVED_ONLY }}
+          PAGES_URL: ${{ steps.pages.outputs.base_url }}
         run: python scripts/build_data.py
 
-      - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

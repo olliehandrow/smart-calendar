@@ -4,11 +4,8 @@ Builds site/data.json for the smart calendar display.
 
   - Events:  Planning Center Calendar API (event_instances + their parent event)
   - Weather: Open-Meteo (free, no API key)
-  - Facts:   uselessfacts.jsph.pl (free, no API key)
-  - Quotes:  zenquotes.io (free, no API key)
-             Both fall back to content/facts.txt / content/quotes.txt if the API call fails.
-             Fetched once per local day: later builds that day reuse the facts/quotes
-             from the currently deployed data.json (PAGES_URL) so they don't change.
+  - Facts:   content/facts.txt
+  - Quotes:  content/quotes.txt  ("text | author" per line)
 
 Standard library only, so the GitHub Action needs no pip install.
 
@@ -18,7 +15,6 @@ Environment variables (set as GitHub Secrets / Variables):
   LATITUDE, LONGITUDE      for the weather card           (optional; weather is skipped if unset)
   PCO_ONLY_PUBLIC          "true" to show only events visible in Church Center (default false)
   PCO_APPROVED_ONLY        "true" to hide pending/rejected events (default true)
-  PAGES_URL                deployed site URL, set by the workflow (optional)
 """
 import base64, json, os, sys, urllib.parse, urllib.request
 from datetime import datetime, timedelta, timezone
@@ -138,47 +134,6 @@ def read_quotes():
     return out
 
 
-def fetch_facts(n=10):
-    out = []
-    try:
-        for _ in range(n):
-            text = get_json("https://uselessfacts.jsph.pl/api/v2/facts/random?language=en").get("text", "").strip()
-            if text and text not in out:
-                out.append(text)
-    except Exception as ex:  # nice-to-have; fall back to the local list rather than fail the build
-        print("facts fetch failed:", ex)
-    return out or read_lines("facts.txt")
-
-
-def fetch_quotes(n=10):
-    try:
-        quotes = [
-            {"text": q["q"].strip(), "author": (q.get("a") or "").strip()}
-            for q in get_json("https://zenquotes.io/api/quotes")
-            if q.get("q")
-        ]
-        if quotes:
-            return quotes[:n]
-    except Exception as ex:  # nice-to-have; fall back to the local list rather than fail the build
-        print("quotes fetch failed:", ex)
-    return read_quotes()
-
-
-def previous_content(today):
-    """Facts/quotes from the deployed data.json if it was built earlier today, else None."""
-    base = os.environ.get("PAGES_URL", "").strip()
-    if not base:
-        return None
-    try:
-        prev = get_json(base.rstrip("/") + "/data.json")
-    except Exception as ex:
-        print("previous data.json fetch failed:", ex)
-        return None
-    if prev.get("content_date") == today.isoformat() and prev.get("facts") and prev.get("quotes"):
-        return prev["facts"], prev["quotes"]
-    return None
-
-
 # ---------------------------------------------------------------- main
 def main():
     today = datetime.now(TZ).date()
@@ -187,15 +142,13 @@ def main():
     end = start + timedelta(days=36)                                 # 4-week month view + margin
 
     events = fetch_events(start, end)
-    facts, quotes = previous_content(today) or (fetch_facts(), fetch_quotes())
     data = {
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "timezone": TZ_NAME,
         "events": events,
         "weather": fetch_weather(),
-        "content_date": today.isoformat(),
-        "facts": facts,
-        "quotes": quotes,
+        "facts": read_lines("facts.txt"),
+        "quotes": read_quotes(),
     }
     OUT.write_text(json.dumps(data, indent=1, ensure_ascii=False), encoding="utf-8")
     print(f"wrote {OUT} with {len(events)} events, {len(data['weather'])} weather days")

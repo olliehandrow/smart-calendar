@@ -1,6 +1,36 @@
-# One quote per line:  quote text | author   (author is optional)
-The road to success begins with knowing what you need to know and why. | Savania China
-Play is the highest form of research. | Albert Einstein
+# Quotes for the Smart Calendar. One per line, in the form:  quote text | author
+# The author is optional. Lines starting with # are ignored.
+# Keep each under about 100 characters so it fits the card.
 The important thing is not to stop questioning. | Albert Einstein
-Somewhere, something incredible is waiting to be known. | Carl Sagan
-Tell me and I forget. Teach me and I remember. Involve me and I learn.
+I have no special talents. I am only passionately curious. | Albert Einstein
+Imagination is more important than knowledge. | Albert Einstein
+If I have seen further, it is by standing on the shoulders of giants. | Isaac Newton
+Chance favors only the prepared mind. | Louis Pasteur
+The first principle is that you must not fool yourself, and you are the easiest person to fool. | Richard Feynman
+Science is a way of thinking much more than it is a body of knowledge. | Carl Sagan
+We are a way for the cosmos to know itself. | Carl Sagan
+Imagination will often carry us to worlds that never were. But without it we go nowhere. | Carl Sagan
+Any sufficiently advanced technology is indistinguishable from magic. | Arthur C. Clarke
+Remember to look up at the stars and not down at your feet. | Stephen Hawking
+Genius is one percent inspiration and ninety-nine percent perspiration. | Thomas Edison
+Nothing is too wonderful to be true if it be consistent with the laws of nature. | Michael Faraday
+Discovery consists of seeing what everybody has seen and thinking what nobody has thought. | Albert Szent-Gyorgyi
+The most dangerous phrase in the language is 'We've always done it this way.' | Grace Hopper
+A ship in port is safe, but that's not what ships are built for. | Grace Hopper
+The best way to predict the future is to invent it. | Alan Kay
+Don't let anyone rob you of your imagination, your creativity, or your curiosity. | Mae Jemison
+All adventures, especially into new territory, are scary. | Sally Ride
+What you do makes a difference, and you have to decide what kind of difference you want to make. | Jane Goodall
+There will always be science, engineering, and technology. And there will always, always be mathematics. | Katherine Johnson
+Learning never exhausts the mind. | Leonardo da Vinci
+Give me a lever long enough and a place to stand, and I will move the world. | Archimedes
+People protect what they love. | Jacques Cousteau
+It's kind of fun to do the impossible. | Walt Disney
+It is possible to fly without motors, but not without knowledge and skill. | Wilbur Wright
+I was taught that the way of progress was neither swift nor easy. | Marie Curie
+Education is the key to unlock the golden door of freedom. | George Washington Carver
+The good thing about science is that it's true whether or not you believe in it. | Neil deGrasse Tyson
+Every expert was once a beginner.
+Mistakes are how we learn.
+Big ideas start with a simple question.
+Curiosity is where every discovery begins.

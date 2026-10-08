@@ -1,11 +1,100 @@
-# One fun fact per line. The display picks a different one each day.
-Octopuses have three hearts!
-Honey never spoils. Archaeologists have found 3,000-year-old honey that's still edible.
-A cloud can weigh more than a million pounds.
-Bananas are berries, but strawberries aren't.
-Saturn would float if you could find a bathtub big enough.
-Sharks existed before trees.
-A day on Venus is longer than its year.
-Butterflies taste with their feet.
+# Fun facts for the Smart Calendar. One per line; lines starting with # are ignored.
+# The display shows one per day and cycles through the list in order.
+# Keep each under about 60 characters so it fits the card in two lines.
+Octopuses have three hearts and blue blood.
 A group of flamingos is called a flamboyance.
-Lightning is about five times hotter than the surface of the sun.
+Butterflies taste with their feet.
+Sharks are older than trees.
+Honey can last thousands of years without spoiling.
+A hummingbird's heart can beat over 1,000 times a minute.
+Wombats make cube-shaped poop.
+Crows can recognize human faces.
+Giraffes and humans both have seven neck bones.
+Starfish have no brain and no blood.
+Dolphins sleep with half their brain at a time.
+Bananas are berries, but strawberries aren't.
+Sea otters hold hands while they sleep.
+Bees tell each other where flowers are by dancing.
+Tardigrades can survive in outer space.
+Axolotls can regrow lost legs, tails and more.
+Some adult mayflies live for only a day.
+Elephants can recognize themselves in a mirror.
+Owls can turn their heads about 270 degrees.
+Koalas have fingerprints a lot like ours.
+Cheetahs can run up to about 60 miles per hour.
+Peregrine falcons dive faster than 200 miles per hour.
+A giant squid's eye can be as big as a dinner plate.
+Some giant sequoias are over 3,000 years old.
+Fireflies make light with almost no heat.
+Birds are living relatives of the dinosaurs.
+T. rex lived closer to us in time than to Stegosaurus.
+A blue whale is the largest animal ever known.
+Fleas can jump about 100 times their body length.
+Adults have 206 bones. Babies have about 300.
+Your heart beats about 100,000 times a day.
+Your brain uses about 20% of your body's energy.
+Skin is your body's largest organ.
+Your brain has about 86 billion neurons.
+The DNA in one of your cells is about 2 meters long.
+Fingernails grow faster than toenails.
+Astronauts can grow up to 2 inches taller in space.
+Your taste buds are replaced about every two weeks.
+Babies are born with soft cartilage where kneecaps will be.
+A day on Venus is longer than its year.
+Saturn is light enough that it would float in water.
+Sunlight takes about 8 minutes to reach Earth.
+Jupiter's Great Red Spot is a storm bigger than Earth.
+Footprints on the Moon could last millions of years.
+A teaspoon of neutron star would weigh billions of tons.
+Sunsets on Mars look blue.
+Astronauts on the ISS see 16 sunrises every day.
+Olympus Mons on Mars is the tallest volcano we know.
+A year on Mercury lasts only 88 Earth days.
+The Sun holds about 99.8% of our solar system's mass.
+One Neptune year lasts about 165 Earth years.
+The Moon drifts about 1.5 inches farther away each year.
+Comet tails always point away from the Sun.
+Venus is hotter than Mercury, even though it's farther out.
+Pluto has a giant heart-shaped plain of ice.
+You would weigh about 1/6 as much on the Moon.
+Yuri Gagarin became the first person in space in 1961.
+Lightning is about 5 times hotter than the Sun's surface.
+A fluffy cloud can weigh over a million pounds.
+Rainbows are really full circles.
+Ice floats because water expands when it freezes.
+Antarctica is the largest desert on Earth.
+Earth's core is about as hot as the Sun's surface.
+Snowflakes have six sides or arms.
+Some bamboo can grow almost a yard in one day.
+Young sunflowers turn to follow the Sun.
+Ocean plants and algae make much of our oxygen.
+The Mariana Trench is about 7 miles deep.
+Lightning can melt sand into glass tubes.
+Count 5 seconds from lightning to thunder: about 1 mile.
+Water covers about 71% of Earth's surface.
+Sound can't travel through the vacuum of space.
+Sound travels about 4 times faster in water than air.
+Diamonds and pencil lead are both made of carbon.
+Glass is made by melting sand.
+Atoms are mostly empty space.
+Spider silk is stronger than steel by weight.
+Velcro was inspired by burrs stuck to a dog.
+White light is all the colors mixed together.
+Mixing many paint colors makes a muddy brown.
+A hot air balloon floats because warm air is lighter.
+The first computer "bug" was a real moth.
+Ada Lovelace published an early computer program in 1843.
+The Eiffel Tower grows taller in hot weather.
+The first webcam watched a coffee pot.
+A Rubik's Cube has over 43 quintillion positions.
+Honeycomb hexagons fit together with no gaps.
+The Wright brothers' first flight lasted 12 seconds.
+A modern phone is far more powerful than Apollo 11's computer.
+The word "robot" comes from a Czech word for forced work.
+LEGO bricks from 1958 still fit with new ones.
+Pi never ends and never repeats.
+Mathematicians in India helped invent the number zero.
+Origami means "folding paper" in Japanese.
+The note A above middle C vibrates 440 times a second.
+The first photograph took hours to capture.
+Leonardo da Vinci sketched flying machines 500 years ago.
